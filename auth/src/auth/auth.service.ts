@@ -3,6 +3,7 @@ import { UsersService } from 'src/users/users.service';
 import { CreateUserDto } from './dto/auth.dto';
 import { CacheService } from 'src/cache/cache.service';
 import { BaseResponse, OtpCheckResponse } from './interface/auth.interface';
+import { log } from 'console';
 
 @Injectable()
 export class AuthService {
@@ -18,7 +19,12 @@ export class AuthService {
     }
 
     await this.userService.createUser(body);
-    await this.createdOtp(body.email);
+    // await this.createdOtp(body.email);
+    const otp = Math.floor(1000 + Math.random() * 9000).toString();
+    const cacheKey = `user_${body.email}_otp`;
+    await this.redisCache.setCacheWithRetry(cacheKey, otp, 60 * 15);
+    const getOtp = await this.redisCache.getCache(cacheKey);
+    console.log(getOtp);
     return { statusCode: HttpStatus.CREATED, success: true };
   }
 
@@ -56,6 +62,8 @@ export class AuthService {
 
     try {
       await this.redisCache.setCacheWithRetry(cacheKey, otp, 60 * 15);
+      const getOtp = await this.redisCache.getCache(cacheKey);
+      console.log(getOtp);
     } catch (error) {
       console.error('Ошибка сохранения OTP в Redis:', error);
     }
