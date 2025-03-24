@@ -1,4 +1,4 @@
-import { IsString, IsEmail, IsOptional, IsObject } from 'class-validator';
+import { IsString, IsEmail, Length } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateUserDto {
@@ -19,4 +19,17 @@ export class CreateUserDto {
   })
   @IsEmail()
   email: string;
+}
+
+export class ResendOtpDto {
+  @ApiProperty({ example: 'user@example.com' })
+  @IsEmail()
+  email: string;
+}
+
+export class CheckOtpDto extends ResendOtpDto {
+  @ApiProperty({ example: '1234', description: 'OTP-код длиной 4 символа' })
+  @IsString()
+  @Length(4, 4)
+  otp: string;
 }

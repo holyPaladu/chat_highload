@@ -7,7 +7,7 @@ import { UsersModule } from './users/users.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { CacheModule } from '@nestjs/cache-manager';
 import { CacheRedisModule } from './cache/cache.module';
-import redisStore from 'cache-manager-redis-store';
+import redisStore from 'cache-manager-redis-yet';
 
 @Module({
   imports: [
@@ -17,14 +17,15 @@ import redisStore from 'cache-manager-redis-store';
     CacheModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        store: redisStore,
-        socket: {
-          host: configService.get<string>('REDIS_HOST', 'redis'),
+      useFactory: async (configService: ConfigService) => {
+        console.log('Подключаем Redis');
+        return {
+          store: redisStore,
+          host: configService.get<string>('REDIS_HOST', 'chat_redis_cache'),
           port: configService.get<number>('REDIS_PORT', 6379),
-        },
-        ttl: 10,
-      }),
+          ttl: 600, // 10 минут
+        };
+      },
     }),
     AuthModule,
     UsersModule,

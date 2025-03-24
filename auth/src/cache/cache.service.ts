@@ -10,6 +10,14 @@ export class CacheService {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
+  async getCache(key: string): Promise<string | undefined | null> {
+    return this.cacheManager.get(key);
+  }
+
+  async deleteCache(key: string): Promise<void> {
+    await this.cacheManager.del(key);
+  }
+
   async setCacheWithRetry(
     key: string,
     value: string,
